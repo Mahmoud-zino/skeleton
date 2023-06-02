@@ -1,0 +1,8 @@
+[data-context-menu] {
+	/* https://floating-ui.com/docs/computeposition#usage */
+	@apply absolute top-0 left-0;
+	/* Set hidden on page load */
+	@apply hidden;
+	/* Transitions */
+	@apply transition-opacity duration-150;
+}
