@@ -337,12 +337,11 @@
 					{value}
 					bind:checked
 					bind:indeterminate
-					on:click
 					on:change
 					on:change={onParentChange}
 				/>
 			{:else}
-				<input class="radio tree-item-radio" type="radio" bind:group {name} {value} on:click on:change />
+				<input class="radio tree-item-radio" type="radio" bind:group {name} {value} on:change />
 			{/if}
 		{/if}
 
