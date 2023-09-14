@@ -92,6 +92,7 @@
 	// REPL: https://svelte.dev/repl/de117399559f4e7e9e14e2fc9ab243cc?version=3.12.1
 	$: if (multiple) updateCheckbox(group);
 	$: if (multiple) updateGroup(checked);
+	$: if (!multiple) updateRadio(group);
 	function updateCheckbox(group: unknown) {
 		if (!Array.isArray(group)) return;
 		checked = group.indexOf(value) >= 0;
@@ -110,6 +111,12 @@
 				group = group;
 			}
 		}
+	}
+	function updateRadio(singleGroup: unknown) {
+		checked = singleGroup === value;
+
+		/** @event {{checked: boolean}} groupChange - Fires when the group changes */
+		dispatch('groupChange', { checked: checked });
 	}
 
 	// called when a child's value is changed
@@ -153,7 +160,8 @@
 			}
 		}
 		// important to notify parent of item
-		dispatch('change');
+		/** @event childChange - Fires when the group of the child changes */
+		dispatch('childChange');
 	}
 
 	// used to update children of item when checked / unchecked in multiple mode
@@ -208,7 +216,7 @@
 
 	// whenever children are changed, reassign on:change events.
 	$: children.forEach((child) => {
-		if (child) child.$on('change', () => onChildValueChange());
+		if (child) child.$on('childChange', onChildValueChange);
 	});
 
 	// A11y Key Down Handler
@@ -341,7 +349,7 @@
 					on:change={onParentChange}
 				/>
 			{:else}
-				<input class="radio tree-item-radio" type="radio" bind:group {name} {value} on:change />
+				<input class="radio tree-item-radio" type="radio" bind:group {name} {value} on:change={onChildValueChange} />
 			{/if}
 		{/if}
 
