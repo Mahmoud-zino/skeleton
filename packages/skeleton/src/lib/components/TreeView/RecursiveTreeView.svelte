@@ -1,3 +1,6 @@
+<!-- To access props and events using reference (used in tests) -->
+<svelte:options accessors />
+
 <script lang="ts">
     import { setContext } from 'svelte';
     
@@ -106,6 +109,7 @@
 
     export let expandedNodes : string[] = [];
     export let disabledNodes : string[] = [];
+    export let checkedNodes : string[] = [];
 </script>
 
 <div
@@ -118,8 +122,9 @@
 	aria-disabled={disabled}
 >
 	{#if nodes && nodes.length > 0}
-        <RecursiveTreeViewItem nodes={nodes} 
+        <RecursiveTreeViewItem nodes={nodes}
             bind:expandedNodes={expandedNodes}
-            bind:disabledNodes={disabledNodes}/>
+            bind:disabledNodes={disabledNodes}
+			bind:checkedNodes={checkedNodes}/>
 	{/if}
 </div>

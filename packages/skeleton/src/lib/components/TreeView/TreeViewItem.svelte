@@ -28,6 +28,8 @@
 	 * @type {unknown}
 	 */
 	export let value: unknown = undefined;
+	/** Set the input's check state */
+	export let checked = false;
 	/**
 	 * Provide children references to support relational checking.
 	 * @type {TreeViewItem[]}
@@ -78,7 +80,6 @@
 	export let hideChildren = false;
 
 	// Locals
-	let checked = false;
 	let treeItem: HTMLDetailsElement;
 	let childrenDiv: HTMLDivElement;
 
@@ -93,6 +94,7 @@
 	$: if (multiple) updateCheckbox(group);
 	$: if (multiple) updateGroup(checked);
 	$: if (!multiple) updateRadio(group);
+	$: if (!multiple) updateRadioGroup(checked);
 	function updateCheckbox(group: unknown) {
 		if (!Array.isArray(group)) return;
 		checked = group.indexOf(value) >= 0;
@@ -119,6 +121,13 @@
 
 		/** @event {{checked: boolean}} groupChange - Fires when the group changes */
 		dispatch('groupChange', { checked: checked });
+	}
+
+	function updateRadioGroup(checked: boolean) {
+		if(checked && group !== value)
+			group = value;
+		else if(!checked && group === value)
+			group = [];
 	}
 
 	// called when a child's value is changed
