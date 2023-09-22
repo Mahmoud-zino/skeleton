@@ -11,12 +11,14 @@
     export let expandedNodes : string[] = [];
     export let disabledNodes : string[] = [];
     export let checkedNodes : string[] = [];
+    export let indeterminateNodes : string[] = [];
     
 	// Context API
 	/** Enable tree-view selection */
 	let selection: boolean = getContext('selection');
 	/** Enable selection of multiple items. */
 	let multiple: boolean = getContext('multiple');
+	let relational: boolean = getContext('relational');
 
     // Locals
     let group: unknown;
@@ -39,18 +41,32 @@
         }
     }
 
-    function checkNode(node: TreeViewNode, checked: boolean) {
+    function checkNode(node: TreeViewNode, checked: boolean, indeterminate: boolean) {
         if(checked) {
             // node is not registered as checked
             if(!checkedNodes.includes(node.id)) {
                 checkedNodes.push(node.id);
                 checkedNodes = checkedNodes;
             } 
+
+            if(!indeterminate && indeterminateNodes.includes(node.id)) {
+                indeterminateNodes.splice(indeterminateNodes.indexOf(node.id), 1);
+                indeterminateNodes = indeterminateNodes;
+            }
         } else {
             // node is registered as checked
             if(checkedNodes.includes(node.id)) {
                 checkedNodes.splice(checkedNodes.indexOf(node.id), 1);
                 checkedNodes = checkedNodes;
+            }
+
+            // node is indeterminate but not registered as indeterminate
+            if(indeterminate && !indeterminateNodes.includes(node.id)) {
+                indeterminateNodes.push(node.id);
+                indeterminateNodes = indeterminateNodes;
+            } else if(!indeterminate && indeterminateNodes.includes(node.id)) {
+                indeterminateNodes.splice(indeterminateNodes.indexOf(node.id), 1);
+                indeterminateNodes = indeterminateNodes;
             }
         }
     }
@@ -61,7 +77,6 @@
             name = String(Math.random());
 
             if(group === undefined) {
-
                 if(multiple) {
                     group = [];
                     nodes.forEach(node => {
@@ -77,13 +92,24 @@
                     })
                 }
             }
+
+            if(!relational)
+            {
+                treeItems = [];
+            }
         }
     });
+
+	// important to pass children up to items (recursively)
+	export let treeItems: TreeViewItem[] = [];
+	let children: TreeViewItem[][] = [];
 </script>
 
 {#if nodes && nodes.length > 0}
 	{#each nodes as node, i}
 		<TreeViewItem
+            bind:this={treeItems[i]}
+			bind:children={children[i]}
 			hideLead={!node.lead}
 			hideChildren={!node.children || node.children.length === 0}
             open={expandedNodes.includes(node.id)}
@@ -93,7 +119,8 @@
             bind:name
             bind:value={node.id}
             checked={checkedNodes.includes(node.id)}
-            on:groupChange={(e) => checkNode(node, e.detail.checked)}
+            indeterminate={indeterminateNodes.includes(node.id)}
+            on:groupChange={(e) => checkNode(node, e.detail.checked, e.detail.indeterminate)}
         >
 			{@html node.content}
 			<svelte:fragment slot="lead">
@@ -104,7 +131,9 @@
                     nodes={node.children} 
                     bind:expandedNodes={expandedNodes}
                     bind:disabledNodes={disabledNodes}
-                    bind:checkedNodes={checkedNodes}/>
+                    bind:checkedNodes={checkedNodes}
+                    bind:indeterminateNodes
+                    bind:treeItems={children[i]} />
 			</svelte:fragment>
 		</TreeViewItem>
 	{/each}

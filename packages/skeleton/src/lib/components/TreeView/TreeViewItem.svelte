@@ -91,15 +91,15 @@
 	// Svelte Checkbox Bugfix
 	// GitHub: https://github.com/sveltejs/svelte/issues/2308
 	// REPL: https://svelte.dev/repl/de117399559f4e7e9e14e2fc9ab243cc?version=3.12.1
-	$: if (multiple) updateCheckbox(group);
+	$: if (multiple) updateCheckbox(group, indeterminate);
 	$: if (multiple) updateGroup(checked);
 	$: if (!multiple) updateRadio(group);
 	$: if (!multiple) updateRadioGroup(checked);
-	function updateCheckbox(group: unknown) {
+	function updateCheckbox(group: unknown, indeterminate: boolean) {
 		if (!Array.isArray(group)) return;
 		checked = group.indexOf(value) >= 0;
-		/** @event {{checked: boolean}} groupChange - Fires when the group changes */
-		dispatch('groupChange', { checked: checked });
+		/** @event {{checked: boolean, indeterminate: boolean}} groupChange - Fires when the group changes */
+		dispatch('groupChange', { checked: checked, indeterminate: indeterminate });
 	}
 	function updateGroup(checked: boolean) {
 		if (!Array.isArray(group)) return;
@@ -119,8 +119,8 @@
 	function updateRadio(singleGroup: unknown) {
 		checked = singleGroup === value;
 
-		/** @event {{checked: boolean}} groupChange - Fires when the group changes */
-		dispatch('groupChange', { checked: checked });
+		/** @event {{checked: boolean, indeterminate: boolean}} groupChange - Fires when the group changes */
+		dispatch('groupChange', { checked: checked, indeterminate: false });
 	}
 
 	function updateRadioGroup(checked: boolean) {

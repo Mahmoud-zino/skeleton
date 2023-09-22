@@ -13,6 +13,8 @@
 	export let selection = false;
 	/** Enable selection of multiple items. */
 	export let multiple = false;
+	/** Enable relational checking. */
+	export let relational = false;
 	/**
 	 * Provide data-driven nodes.
 	 * @type {TreeViewNode[]}
@@ -89,6 +91,7 @@
 	setContext('open', open);
 	setContext('selection', selection);
 	setContext('multiple', multiple);
+	setContext('relational', relational);
 	setContext('disabled', disabled);
 	setContext('padding', padding);
 	setContext('indent', indent);
@@ -110,6 +113,7 @@
     export let expandedNodes : string[] = [];
     export let disabledNodes : string[] = [];
     export let checkedNodes : string[] = [];
+    export let indeterminateNodes : string[] = [];
 </script>
 
 <div
@@ -125,6 +129,7 @@
         <RecursiveTreeViewItem nodes={nodes}
             bind:expandedNodes={expandedNodes}
             bind:disabledNodes={disabledNodes}
-			bind:checkedNodes={checkedNodes}/>
+			bind:checkedNodes={checkedNodes}
+			bind:indeterminateNodes/>
 	{/if}
 </div>
