@@ -84,19 +84,12 @@
                             group.push(node.id);
                     })
                     group = group;
-                } else {
+                } else if(!nodes.some(node => checkedNodes.includes(node.id))) {
                     group = '';
-                    nodes.forEach(node => {
-                        if(checkedNodes.includes(node.id))
-                            group = node.id
-                    })
                 }
             }
 
-            if(!relational)
-            {
-                treeItems = [];
-            }
+            if(!relational) treeItems = [];
         }
     });
 

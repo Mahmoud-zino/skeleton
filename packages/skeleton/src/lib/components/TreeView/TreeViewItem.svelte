@@ -7,7 +7,7 @@
 	 * @slot {{}} lead - Allows for an optional leading element, such as an icon.
 	 * @slot {{}} children - Provide TreeView item children.
 	 */
-	import { getContext, createEventDispatcher } from 'svelte';
+	import { getContext, createEventDispatcher, onMount } from 'svelte';
 
 	// Types
 	import type { CssClasses, SvelteEvent, TreeViewItem } from '../../index.js';
@@ -100,6 +100,7 @@
 		checked = group.indexOf(value) >= 0;
 		/** @event {{checked: boolean, indeterminate: boolean}} groupChange - Fires when the group changes */
 		dispatch('groupChange', { checked: checked, indeterminate: indeterminate });
+		dispatch('childChange');
 	}
 	function updateGroup(checked: boolean) {
 		if (!Array.isArray(group)) return;
@@ -115,19 +116,20 @@
 				group = group;
 			}
 		}
+		onParentChange();
 	}
-	function updateRadio(singleGroup: unknown) {
-		checked = singleGroup === value;
-
+	function updateRadio(group: unknown) {
+		checked = group === value;
 		/** @event {{checked: boolean, indeterminate: boolean}} groupChange - Fires when the group changes */
 		dispatch('groupChange', { checked: checked, indeterminate: false });
+		if(group) dispatch('childChange');
 	}
 
 	function updateRadioGroup(checked: boolean) {
 		if(checked && group !== value)
 			group = value;
 		else if(!checked && group === value)
-			group = [];
+			group = '';
 	}
 
 	// called when a child's value is changed
@@ -173,9 +175,11 @@
 		}
 		// single selection mode
 		else {
-			if (group !== value) {
+			if (group !== value && children.some(c => c.checked)) {
 				// check item
 				group = value;
+			} else if(group === value && !children.some(c => c.checked)) {
+				group = '';
 			}
 		}
 		// important to notify parent of item
@@ -195,7 +199,6 @@
 			if (!child || !Array.isArray(child.group)) return;
 			child.indeterminate = false;
 			if (child.group.indexOf(child.value) < 0) {
-				// child.group = [...child.group, child.value] won't work here.
 				child.group.push(child.value);
 				child.group = child.group;
 			}
@@ -219,11 +222,11 @@
 	}
 
 	// used to update children of item when checked / unchecked in single mode
-	$: if (!multiple && group) {
+	$: if (!multiple && group !== undefined) {
 		if (group !== value) {
 			// uncheck all children
 			children.forEach((child) => {
-				if (child) child.group = [];
+				if (child) child.group = '';
 			});
 		}
 	}
@@ -364,11 +367,10 @@
 					{value}
 					bind:checked
 					bind:indeterminate
-					on:change={() => dispatch('childChange')}
 					on:change={onParentChange}
 				/>
 			{:else}
-				<input class="radio tree-item-radio" type="radio" bind:group {name} {value} on:change={onChildValueChange} />
+				<input class="radio tree-item-radio" type="radio" bind:group {name} {value} />
 			{/if}
 		{/if}
 
