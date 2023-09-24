@@ -103,7 +103,7 @@
 		dispatch('groupChange', { checked: checked, indeterminate: indeterminate });
 		dispatch('childChange');
 	}
-	let init = true;
+	let initUpdate = true;
 	function updateGroup(checked: boolean, indeterminate: boolean) {
 		if (!Array.isArray(group)) return;
 		const index = group.indexOf(value);
@@ -111,32 +111,33 @@
 			if (index < 0) {
 				group.push(value);
 				group = group;
+				// called only when the group changes
 				onParentChange();
 			}
 		} else {
 			if (index >= 0) {
 				group.splice(index, 1);
 				group = group;
+				// called only when the group changes
 				onParentChange();
 			}
 		}
-		if(init) {
+		// called only once when initializing to apply default checks
+		if (initUpdate) {
 			onParentChange();
-			init = false;
+			initUpdate = false;
 		}
 	}
+
 	function updateRadio(group: unknown) {
 		checked = group === value;
 		/** @event {{checked: boolean, indeterminate: boolean}} groupChange - Fires when the group changes */
 		dispatch('groupChange', { checked: checked, indeterminate: false });
-		if(group) dispatch('childChange');
+		if (group) dispatch('childChange');
 	}
-
 	function updateRadioGroup(checked: boolean) {
-		if(checked && group !== value)
-			group = value;
-		else if(!checked && group === value)
-			group = '';
+		if (checked && group !== value) group = value;
+		else if (!checked && group === value) group = '';
 	}
 
 	// called when a child's value is changed
@@ -182,10 +183,11 @@
 		}
 		// single selection mode
 		else {
-			if (group !== value && children.some(c => c.checked)) {
-				// check item
+			// one of the children is checked => check item
+			if (group !== value && children.some((c) => c.checked)) {
 				group = value;
-			} else if(group === value && !children.some(c => c.checked)) {
+				// none of the children are checked => uncheck item
+			} else if (group === value && !children.some((c) => c.checked)) {
 				group = '';
 			}
 		}
@@ -201,7 +203,7 @@
 		// group must by array in multiple mode
 		if (!Array.isArray(group)) return;
 		const index = group.indexOf(value);
-		
+
 		const checkChild = (child: TreeViewItem) => {
 			if (!child || !Array.isArray(child.group)) return;
 			child.indeterminate = false;
@@ -221,6 +223,7 @@
 		};
 
 		children.forEach((child) => {
+			if (!child) return;
 			// if parent is checked, check all children, else uncheck all children
 			index >= 0 ? checkChild(child) : uncheckChild(child);
 			// notify children to update values

@@ -1,14 +1,11 @@
-<!-- To access props and events using reference (used in tests) -->
-<svelte:options accessors />
-
 <script lang="ts">
-    import { setContext } from 'svelte';
-    
+	import { setContext } from 'svelte';
+
 	// Types
 	import type { CssClasses, TreeViewNode } from '../../index.js';
-	import RecursiveTreeViewItem from "./RecursiveTreeViewItem.svelte";
+	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
 
-    // Props (parent)
+	// Props (parent)
 	/** Enable tree-view selection. */
 	export let selection = false;
 	/** Enable selection of multiple items. */
@@ -20,6 +17,26 @@
 	 * @type {TreeViewNode[]}
 	 */
 	export let nodes: TreeViewNode[] = [];
+	/**
+	 * provides id's of expanded nodes
+	 * @type {string[]}
+	 */
+	export let expandedNodes: string[] = [];
+	/**
+	 * provides id's of disabled nodes
+	 * @type {string[]}
+	 */
+	export let disabledNodes: string[] = [];
+	/**
+	 * provides id's of checked nodes
+	 * @type {string[]}
+	 */
+	export let checkedNodes: string[] = [];
+	/**
+	 * provides id's of indeterminate nodes
+	 * @type {string[]}
+	 */
+	export let indeterminateNodes: string[] = [];
 	/** Provide classes to set the tree width. */
 	export let width: CssClasses = 'w-full';
 	/** Provide classes to set the vertical spacing between items. */
@@ -59,34 +76,6 @@
 	/** Provide the ARIA labelledby value. */
 	export let labelledby = '';
 
-	// Functionality
-	/**
-	 * expands all tree view items.
-	 * @type {() => void}
-	 */
-	export function expandAll(): void {
-		const detailsElements = tree.querySelectorAll<HTMLDetailsElement>('details.tree-item');
-		detailsElements.forEach((details) => {
-			if (!details.open) {
-				const summary = details.querySelector<HTMLElement>('summary.tree-item-summary');
-				if (summary) summary.click();
-			}
-		});
-	}
-	/**
-	 * collapses all tree view items.
-	 * @type {() => void}
-	 */
-	export function collapseAll(): void {
-		const detailsElements = tree.querySelectorAll<HTMLDetailsElement>('details.tree-item');
-		detailsElements.forEach((details) => {
-			if (details.open) {
-				const summary = details.querySelector<HTMLElement>('summary.tree-item-summary');
-				if (summary) summary.click();
-			}
-		});
-	}
-
 	// Context API
 	setContext('open', open);
 	setContext('selection', selection);
@@ -106,18 +95,9 @@
 
 	// Reactive
 	$: classesBase = `${width} ${spacing} ${$$props.class ?? ''}`;
-
-	// Locals
-	let tree: HTMLDivElement;
-
-    export let expandedNodes : string[] = [];
-    export let disabledNodes : string[] = [];
-    export let checkedNodes : string[] = [];
-    export let indeterminateNodes : string[] = [];
 </script>
 
 <div
-	bind:this={tree}
 	class="tree {classesBase}"
 	data-testid="tree"
 	role="tree"
@@ -126,10 +106,6 @@
 	aria-disabled={disabled}
 >
 	{#if nodes && nodes.length > 0}
-        <RecursiveTreeViewItem nodes={nodes}
-            bind:expandedNodes={expandedNodes}
-            bind:disabledNodes={disabledNodes}
-			bind:checkedNodes={checkedNodes}
-			bind:indeterminateNodes/>
+		<RecursiveTreeViewItem {nodes} bind:expandedNodes bind:disabledNodes bind:checkedNodes bind:indeterminateNodes />
 	{/if}
 </div>
