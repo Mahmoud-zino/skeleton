@@ -92,31 +92,38 @@
 	// GitHub: https://github.com/sveltejs/svelte/issues/2308
 	// REPL: https://svelte.dev/repl/de117399559f4e7e9e14e2fc9ab243cc?version=3.12.1
 	$: if (multiple) updateCheckbox(group, indeterminate);
-	$: if (multiple) updateGroup(checked);
+	$: if (multiple) updateGroup(checked, indeterminate);
 	$: if (!multiple) updateRadio(group);
 	$: if (!multiple) updateRadioGroup(checked);
 	function updateCheckbox(group: unknown, indeterminate: boolean) {
 		if (!Array.isArray(group)) return;
 		checked = group.indexOf(value) >= 0;
+		updateGroup(checked, indeterminate);
 		/** @event {{checked: boolean, indeterminate: boolean}} groupChange - Fires when the group changes */
 		dispatch('groupChange', { checked: checked, indeterminate: indeterminate });
 		dispatch('childChange');
 	}
-	function updateGroup(checked: boolean) {
+	let init = true;
+	function updateGroup(checked: boolean, indeterminate: boolean) {
 		if (!Array.isArray(group)) return;
 		const index = group.indexOf(value);
 		if (checked) {
 			if (index < 0) {
 				group.push(value);
 				group = group;
+				onParentChange();
 			}
 		} else {
 			if (index >= 0) {
 				group.splice(index, 1);
 				group = group;
+				onParentChange();
 			}
 		}
-		onParentChange();
+		if(init) {
+			onParentChange();
+			init = false;
+		}
 	}
 	function updateRadio(group: unknown) {
 		checked = group === value;
@@ -194,7 +201,7 @@
 		// group must by array in multiple mode
 		if (!Array.isArray(group)) return;
 		const index = group.indexOf(value);
-
+		
 		const checkChild = (child: TreeViewItem) => {
 			if (!child || !Array.isArray(child.group)) return;
 			child.indeterminate = false;

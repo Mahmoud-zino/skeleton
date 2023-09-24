@@ -88,7 +88,7 @@
                     group = '';
                 }
             }
-
+            
             if(!relational) treeItems = [];
         }
     });
@@ -122,9 +122,9 @@
 			<svelte:fragment slot="children">
 				<RecursiveTreeViewItem 
                     nodes={node.children} 
-                    bind:expandedNodes={expandedNodes}
-                    bind:disabledNodes={disabledNodes}
-                    bind:checkedNodes={checkedNodes}
+                    bind:expandedNodes
+                    bind:disabledNodes
+                    bind:checkedNodes
                     bind:indeterminateNodes
                     bind:treeItems={children[i]} />
 			</svelte:fragment>
