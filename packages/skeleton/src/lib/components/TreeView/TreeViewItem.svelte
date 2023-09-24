@@ -95,15 +95,19 @@
 	$: if (multiple) updateGroup(checked, indeterminate);
 	$: if (!multiple) updateRadio(group);
 	$: if (!multiple) updateRadioGroup(checked);
+	let initUpdate = true;
 	function updateCheckbox(group: unknown, indeterminate: boolean) {
 		if (!Array.isArray(group)) return;
 		checked = group.indexOf(value) >= 0;
-		updateGroup(checked, indeterminate);
 		/** @event {{checked: boolean, indeterminate: boolean}} groupChange - Fires when the group changes */
 		dispatch('groupChange', { checked: checked, indeterminate: indeterminate });
 		dispatch('childChange');
+		// called only once when initializing to apply default checks
+		if (initUpdate) {
+			onParentChange();
+			initUpdate = false;
+		}
 	}
-	let initUpdate = true;
 	function updateGroup(checked: boolean, indeterminate: boolean) {
 		if (!Array.isArray(group)) return;
 		const index = group.indexOf(value);
@@ -121,11 +125,6 @@
 				// called only when the group changes
 				onParentChange();
 			}
-		}
-		// called only once when initializing to apply default checks
-		if (initUpdate) {
-			onParentChange();
-			initUpdate = false;
 		}
 	}
 

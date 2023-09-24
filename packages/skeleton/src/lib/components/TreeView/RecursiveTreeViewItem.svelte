@@ -2,7 +2,7 @@
 	import TreeViewItem from './TreeViewItem.svelte';
 	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
 	import type { TreeViewNode } from './types.js';
-	import { getContext, onMount } from 'svelte';
+	import { getContext, onMount, tick } from 'svelte';
 
 	// this can't be passed using context, since we have to pass it to recursive children.
 	/** Provide data-driven nodes. */
@@ -33,6 +33,8 @@
 	let selection: boolean = getContext('selection');
 	let multiple: boolean = getContext('multiple');
 	let relational: boolean = getContext('relational');
+
+	let tempCheckedNodes: string[] = [];
 
 	// Locals
 	let group: unknown;
@@ -88,7 +90,9 @@
 		}
 	}
 
-	onMount(() => {
+	// init check flow will messup the checked nodes, so we save it to reassign it onMount.
+	tempCheckedNodes = [...checkedNodes];
+	onMount(async () => {
 		if (selection) {
 			// random number as name
 			name = String(Math.random());
@@ -108,6 +112,11 @@
 
 			// remove relational links
 			if (!relational) treeItems = [];
+
+			// reassign checkNodes to ensure component starting with the correct check values.
+			checkedNodes = [];
+			await tick();
+			checkedNodes = [...tempCheckedNodes];
 		}
 	});
 
